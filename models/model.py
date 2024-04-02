@@ -62,6 +62,7 @@ class Model(pl.LightningModule):
                  batch_norm, 
                  filter_org, 
                  classes = 10,
+                 dropout = 0.0,
                  train_dataset=None, 
                  val_dataset=None, 
                  test_dataset=None):
@@ -72,6 +73,7 @@ class Model(pl.LightningModule):
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
+        self.dropout = nn.Dropout(dropout)
 
 
         if activation == 'relu':
@@ -96,7 +98,7 @@ class Model(pl.LightningModule):
 
     def forward(self, x):
         x = self.conv_blocks(x) 
-        x = self.activation(self.fc1(x.reshape(x.shape[0],-1)))
+        x = self.activation(self.dropout(self.fc1(x.reshape(x.shape[0],-1))))
         x = F.softmax(self.output(x),dim=1)
         return x
 
