@@ -11,17 +11,7 @@ class ConvBlocks(nn.Module):
     def __init__(self,in_channels,num_filters,filter_size,activation, batch_norm = False, filter_org = 1):
         super().__init__()
         
-        if activation == 'relu':
-            self.activation = nn.ReLU()
-        elif activation == 'silu':
-            self.activation = nn.SiLU()
-        elif self.activation == 'gelu':
-            self.activation = nn.GELU()
-        elif activation == "mish":
-            self.activation = nn.Mish()
-        else:
-            self.activation = nn.ReLU()
-
+        self.activation = activation
         self.batch_norm=batch_norm
         self.filter_org = filter_org
         in_channels_list =[in_channels]
@@ -60,7 +50,7 @@ class Model(pl.LightningModule):
                  neurons_dense, 
                  image_shape, 
                  batch_norm, 
-                 filter_org, 
+                 filter_org,
                  classes = 10,
                  dropout = 0.0,
                  train_dataset=None, 
@@ -87,7 +77,7 @@ class Model(pl.LightningModule):
         else:
             self.activation = nn.ReLU()
         
-        self.conv_blocks = ConvBlocks(in_channels, num_filters, filter_size, activation, batch_norm, filter_org)
+        self.conv_blocks = ConvBlocks(in_channels, num_filters, filter_size, self.activation, batch_norm, filter_org)
         
         fc1_in_channels = self.get_output_shape(image_shape)
         self.fc1 = nn.Linear(fc1_in_channels,neurons_dense, bias=True)  
