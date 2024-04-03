@@ -100,7 +100,7 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"loss": loss, "train_acc": acc}
+        metrics = {"train_loss": loss, "train_acc": acc}
         self.log_dict(metrics)
         return metrics
     
@@ -109,7 +109,7 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"loss": loss, "val_acc": acc}
+        metrics = {"val_loss": loss, "val_acc": acc}
         self.log_dict(metrics)
         return metrics
     
@@ -118,7 +118,7 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"loss": loss, "val_acc": acc}
+        metrics = {"test_loss": loss, "test_acc": acc}
         self.log_dict(metrics)
         return metrics
 
@@ -135,11 +135,11 @@ if __name__ == '__main__':
     batch_size = 16
 
     # Instantiate Model
-    model = Model(in_channels,num_filters,filter_size,activation,neurons_dense, (1, 3, 100, 100), batch_size, batch_norm, filter_org)
-    print (model)
+    # model = Model(in_channels,num_filters,filter_size,activation,neurons_dense, (1, 3, 100, 100), batch_size, batch_norm, filter_org)
+    # print (model)
 
-    sample_input = torch.randn(16,3,100,100)
-    print('INPUT: ', sample_input.shape)
-    output = model(sample_input)
-    print('OUTPUT: ', output.shape)
+    # sample_input = torch.randn(16,3,100,100)
+    # print('INPUT: ', sample_input.shape)
+    # output = model(sample_input)
+    # print('OUTPUT: ', output.shape)
 
