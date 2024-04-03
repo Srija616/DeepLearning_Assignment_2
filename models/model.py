@@ -53,6 +53,7 @@ class Model(pl.LightningModule):
                  filter_org,
                  classes = 10,
                  dropout = 0.0,
+                 batch_size = 32,
                  train_dataset=None, 
                  val_dataset=None, 
                  test_dataset=None):
@@ -64,6 +65,7 @@ class Model(pl.LightningModule):
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
         self.dropout = nn.Dropout(dropout)
+        self.batch_size = batch_size
 
 
         if activation == 'relu':
@@ -121,6 +123,15 @@ class Model(pl.LightningModule):
         metrics = {"test_loss": loss, "test_acc": acc}
         self.log_dict(metrics)
         return metrics
+
+    def train_dataloader(self):
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
+    
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4)
+    
+    def val_dataloader(self):
+        return DataLoader(self.val_dataset,batch_size=self.batch_size, shuffle=False, num_workers=4)
 
 if __name__ == '__main__':
     # Sample Hyperparameters
