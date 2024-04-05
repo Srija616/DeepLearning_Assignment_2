@@ -105,7 +105,7 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"train_loss": loss, "train_acc": acc}
+        metrics = {"loss": loss, "train_acc": acc}
         self.log_dict(metrics, on_epoch=True)
         return metrics
     
