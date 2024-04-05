@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 from torchmetrics import Accuracy
 import numpy as np
+from torch.utils.data import DataLoader,Dataset
 
 class ConvBlocks(nn.Module):
     ''' Defines 5 convolution layers used in a CNN
@@ -59,20 +60,22 @@ class Model(pl.LightningModule):
                  test_dataset=None):
         
         super().__init__()
-
+        self.save_hyperparameters()
+        
         self.accuracy = Accuracy(task='multiclass', num_classes=classes)
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
         self.dropout = nn.Dropout(dropout)
         self.batch_size = batch_size
+        
 
 
         if activation == 'relu':
             self.activation = nn.ReLU()
         elif activation == 'silu':
             self.activation = nn.SiLU()
-        elif self.activation == 'gelu':
+        elif activation == 'gelu':
             self.activation = nn.GELU()
         elif activation == "mish":
             self.activation = nn.Mish()
@@ -102,7 +105,7 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"train_loss": loss, "train_acc": acc}
+        metrics = {"train_loss": loss, "train_acc": acc, on_epoch=True}
         self.log_dict(metrics)
         return metrics
     
@@ -112,7 +115,7 @@ class Model(pl.LightningModule):
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
         metrics = {"val_loss": loss, "val_acc": acc}
-        self.log_dict(metrics)
+        self.log_dict(metrics, prog_bar=True, logger=True, on_epoch=True)
         return metrics
     
     def test_step(self, batch, batch_idx):
