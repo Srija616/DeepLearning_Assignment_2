@@ -9,7 +9,7 @@ from torchvision.models import ResNet50_Weights
 import torchvision
 
 class FinetuneImgModel(pl.LightningModule):
-    def __init__(self, train_dataset, test_dataset, val_dataset, lr=3e-4, num_classes=10, data_aug=False, batch_size=16):
+    def __init__(self, train_dataset, test_dataset, val_dataset, lr=3e-4, num_classes=10, batch_size=16):
         super().__init__()
         self.save_hyperparameters()
         self.train_dataset = train_dataset
@@ -17,7 +17,6 @@ class FinetuneImgModel(pl.LightningModule):
         self.val_dataset = val_dataset
         self.lr = lr
         self.num_classes = num_classes
-        self.data_aug = data_aug
         self.batch_size = batch_size
 
         pretrained_model = torchvision.models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
