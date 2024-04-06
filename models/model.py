@@ -70,6 +70,7 @@ class Model(pl.LightningModule):
         self.dropout = nn.Dropout(dropout)
         self.batch_size = batch_size
         self.lr = lr
+        self.best_val_acc = 0
         
         if activation == 'relu':
             self.activation = nn.ReLU()
@@ -114,8 +115,10 @@ class Model(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         acc = self.accuracy(y_hat, y)
-        metrics = {"val_loss": loss, "val_acc": acc}
-        self.log_dict(metrics, prog_bar=True, logger=True, on_epoch=True)
+        if acc >= self.best_val_acc:
+            self.best_val_acc = acc
+        metrics = {"val_loss": loss, "val_acc": acc, "best_val_acc": self.best_val_acc}
+        self.log_dict(metrics)
         return metrics
     
     def test_step(self, batch, batch_idx):
