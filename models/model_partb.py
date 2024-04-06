@@ -6,7 +6,7 @@ from torchmetrics import Accuracy
 import numpy as np
 from torch.utils.data import DataLoader,Dataset
 from torchvision.models import ResNet50_Weights
-
+import torchvision
 
 class FinetuneImgModel(pl.LightningModule):
     def __init__(self, train_dataset, test_dataset, val_dataset, lr=3e-4, num_classes=10, data_aug=False, batch_size=16):
@@ -36,7 +36,7 @@ class FinetuneImgModel(pl.LightningModule):
         x = self.output(x)
         return x
 
-    def configure_optimizers(self) -> Any:
+    def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
 
     def training_step(self, batch, batch_idx):
