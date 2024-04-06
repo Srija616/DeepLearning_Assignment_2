@@ -55,6 +55,7 @@ class Model(pl.LightningModule):
                  classes = 10,
                  dropout = 0.0,
                  batch_size = 32,
+                 lr = 1e-3,
                  train_dataset=None, 
                  val_dataset=None, 
                  test_dataset=None):
@@ -68,9 +69,8 @@ class Model(pl.LightningModule):
         self.test_dataset = test_dataset
         self.dropout = nn.Dropout(dropout)
         self.batch_size = batch_size
+        self.lr = lr
         
-
-
         if activation == 'relu':
             self.activation = nn.ReLU()
         elif activation == 'silu':
@@ -98,7 +98,7 @@ class Model(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.001)
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -147,6 +147,7 @@ if __name__ == '__main__':
     filter_org = 0.5
     batch_norm = True
     batch_size = 16
+    lr = 1e-3
 
     # Instantiate Model
     # model = Model(in_channels,num_filters,filter_size,activation,neurons_dense, (1, 3, 100, 100), batch_size, batch_norm, filter_org)
