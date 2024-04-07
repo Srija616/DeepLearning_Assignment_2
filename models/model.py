@@ -5,6 +5,7 @@ import pytorch_lightning as pl
 from torchmetrics import Accuracy
 import numpy as np
 from torch.utils.data import DataLoader,Dataset
+import argparse
 
 class ConvBlocks(nn.Module):
     ''' Defines 5 convolution layers used in a CNN
@@ -23,6 +24,7 @@ class ConvBlocks(nn.Module):
             in_channels_list.append(out_channels_list[-1])
             out_channels_list.append(int(filter_org*out_channels_list[-1]))
 
+        # ModuleList is used to store all the five layers of Conv2D, BatchNormalization and max pool
         self.layers = nn.ModuleList()
         self.bn_layers = nn.ModuleList()
         for i in range (5):
@@ -140,23 +142,33 @@ class Model(pl.LightningModule):
     def val_dataloader(self):
         return DataLoader(self.val_dataset,batch_size=self.batch_size, shuffle=False, num_workers=4)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Hyperparameters for your model")
+    parser.add_argument("--in_channels", type=int, default=3, help="Number of input channels")
+    parser.add_argument("--num_filters", type=int, default=32, help="Number of filters in the convolutional layers")
+    parser.add_argument("--filter_size", type=int, default=5, help="Size of the filters in the convolutional layers")
+    parser.add_argument("--activation", type=str, default="relu", help="Activation function for the model")
+    parser.add_argument("--neurons_dense", type=int, default=32, help="Number of neurons in the dense layer")
+    parser.add_argument("--image_shape", type=tuple, default=(3, 100, 100), help="Shape of the input images")
+    parser.add_argument("--batch_norm", type=bool, default=True, help="Whether to use batch normalization")
+    parser.add_argument("--filter_org", type=float, default=0.5, help="Filter organization parameter")
+    parser.add_argument("--classes", type=int, default=10, help="Number of classes in the classification task")
+    parser.add_argument("--dropout", type=float, default=0.0, help="Dropout rate")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
+    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
+    # Add arguments for dataset paths if required
+    # parser.add_argument("--train_dataset", type=str, help="Path to the training dataset")
+    # parser.add_argument("--val_dataset", type=str, help="Path to the validation dataset")
+    # parser.add_argument("--test_dataset", type=str, help="Path to the test dataset")
+    args = parser.parse_args()
+    return args
+
 if __name__ == '__main__':
-    # Sample Hyperparameters
-    # initialize the activation here
-    activation = 'relu'
-    num_filters = 32
-    filter_size = 5
-    in_channels = 3
-    neurons_dense = 32
-    filter_org = 0.5
-    batch_norm = True
-    batch_size = 16
-    lr = 1e-3
 
-    # Instantiate Model
-    # model = Model(in_channels,num_filters,filter_size,activation,neurons_dense, (1, 3, 100, 100), batch_size, batch_norm, filter_org)
-    # print (model)
-
+    # Instantiate Model with argparse values
+    model = Model(args.in_channels, args.num_filters, args.filter_size, args.activation, args.neurons_dense, args.image_shape, args.batch_norm, args.filter_org, args.classes, args.dropout, args.batch_size, args.lr, args.train_dataset, args.val_dataset, args.test_dataset)
+    print(model)
+    
     # sample_input = torch.randn(16,3,100,100)
     # print('INPUT: ', sample_input.shape)
     # output = model(sample_input)
