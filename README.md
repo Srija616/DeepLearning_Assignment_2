@@ -27,4 +27,8 @@ To run training or test for one configuration, you can run the models/model.py. 
     parser.add_argument("--val_path", type=str, help="Path to the validation dataset")
     parser.add_argument("--test_path", type=str, help="Path to the test dataset")
 ```
+You can also run the code for the same using the Python Notebook: PartA_Q2.ipynb
 
+## Part B
+You can run part B directly from the Python Notebook PartB_Q1.ipynb. 
+The finetuning model class is defined in models/model_partb.py
