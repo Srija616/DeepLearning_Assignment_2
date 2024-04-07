@@ -15,6 +15,7 @@ class ConvBlocks(nn.Module):
         self.activation = activation
         self.batch_norm=batch_norm
         self.filter_org = filter_org
+        self.filter_size = filter_size
         in_channels_list =[in_channels]
         out_channels_list = [num_filters]
 
@@ -25,7 +26,7 @@ class ConvBlocks(nn.Module):
         self.layers = nn.ModuleList()
         self.bn_layers = nn.ModuleList()
         for i in range (5):
-            self.layers.append(nn.Conv2d(in_channels=in_channels_list[i],out_channels=out_channels_list[i],kernel_size=filter_size,stride=(1, 1),padding=(1, 1),bias=False))
+            self.layers.append(nn.Conv2d(in_channels=in_channels_list[i],out_channels=out_channels_list[i],kernel_size=self.filter_size,stride=(1, 1),padding=(1, 1),bias=False))
             self.bn_layers.append(nn.BatchNorm2d(out_channels_list[i]))
         self.pool  = nn.MaxPool2d(kernel_size=(2,2), stride=(2,2))
 
