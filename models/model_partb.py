@@ -9,6 +9,10 @@ from torchvision.models import ResNet50_Weights
 import torchvision
 
 class FinetuneImgModel(pl.LightningModule):
+    '''
+    Finetunes the ResNet50 V2 model.
+    The hyperparameters like learning_rate, number of classes and batch_size are flexible and can be given as input.
+    '''
     def __init__(self, train_dataset, test_dataset, val_dataset, lr=3e-4, num_classes=10, batch_size=16):
         super().__init__()
         self.save_hyperparameters()
