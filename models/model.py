@@ -1,11 +1,49 @@
 import torch
 import torch.nn as nn
+from torch import nn,optim
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from torchmetrics import Accuracy
 import numpy as np
-from torch.utils.data import DataLoader,Dataset
+from torch.utils.data import DataLoader,Dataset, random_split, Subset
 import argparse
+import torchvision
+import torchvision.transforms as T
+from torchvision.datasets import ImageFolder
+torch.manual_seed(42)
+
+def preprocess_data(train_path, test_path, data_aug=False):
+    if data_aug == True:
+        transforms = T.Compose([T.RandomResizedCrop((224, 224)),
+                            T.RandomHorizontalFlip(p=0.5),
+                            T.RandomVerticalFlip(p=0.5),
+                            T.RandomRotation(degrees=45),
+                            T.ToTensor(),
+                            T.Normalize(mean=[0, 0, 0], std=[1, 1, 1])
+                ])
+    else:
+        transforms = T.Compose([T.RandomResizedCrop((224, 224)),
+                    T.ToTensor(),
+                    T.Normalize(mean=[0, 0, 0], std=[1, 1, 1])])
+
+    dataset = ImageFolder(train_path, transform=transforms)
+    test_dataset = ImageFolder(test_path, transform=transforms)
+
+    train_size = int(0.8*len(dataset))
+    val_size = (len(dataset) - train_size)
+
+    class_labels = [label for _, label in dataset]
+    target = np.array(class_labels)
+
+    from sklearn.model_selection import StratifiedShuffleSplit
+    stratified_splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+
+    for train_idx, val_idx in stratified_splitter.split(np.zeros(len(target)), target):
+        train_dataset = Subset(dataset, train_idx)
+        val_dataset = Subset(dataset, val_idx)
+
+    return train_dataset, val_dataset, test_dataset
+
 
 class ConvBlocks(nn.Module):
     ''' Defines 5 convolution layers used in a CNN
@@ -155,22 +193,20 @@ def parse_args():
     parser.add_argument("--classes", type=int, default=10, help="Number of classes in the classification task")
     parser.add_argument("--dropout", type=float, default=0.0, help="Dropout rate")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
+    parser.add_argument("--max_epochs", type=int, default=10, help="Epochs")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
-    # Add arguments for dataset paths if required
-    # parser.add_argument("--train_dataset", type=str, help="Path to the training dataset")
-    # parser.add_argument("--val_dataset", type=str, help="Path to the validation dataset")
-    # parser.add_argument("--test_dataset", type=str, help="Path to the test dataset")
+    parser.add_argument("--data_arg", type=bool, default=False, help="Data Augmentation")
+    parser.add_argument("--train_path", type=str, help="Path to the training dataset")
+    parser.add_argument("--val_path", type=str, help="Path to the validation dataset")
+    parser.add_argument("--test_path", type=str, help="Path to the test dataset")
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
-
+    args = parse_args()
     # Instantiate Model with argparse values
-    model = Model(args.in_channels, args.num_filters, args.filter_size, args.activation, args.neurons_dense, args.image_shape, args.batch_norm, args.filter_org, args.classes, args.dropout, args.batch_size, args.lr, args.train_dataset, args.val_dataset, args.test_dataset)
-    print(model)
-    
-    # sample_input = torch.randn(16,3,100,100)
-    # print('INPUT: ', sample_input.shape)
-    # output = model(sample_input)
-    # print('OUTPUT: ', output.shape)
-
+    train_dataset, val_dataset, test_dataset = preprocess_data(args.train_path, args.test_path, args.data_aug)
+    model = Model(args.in_channels, args.num_filters, args.filter_size, args.activation, args.neurons_dense, args.image_shape, args.batch_norm, args.filter_org, args.classes, args.dropout, args.batch_size, args.lr, train_dataset, val_dataset, test_dataset)
+    trainer = pl.Trainer(devices=-1, max_epochs=10, precision='16-mixed')
+    trainer.fit(model)
+    trainer.test(model)
